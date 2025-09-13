@@ -1,0 +1,8 @@
+Parse error on line 6:
+...125000
+    },
+    ...
+]
+app.post('/g
+---------------------^
+Expecting 'STRING', 'NUMBER', 'NULL', 'TRUE', 'FALSE', '{', '[', got 'undefined'
