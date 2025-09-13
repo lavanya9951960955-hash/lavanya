@@ -6,3 +6,50 @@ Parse error on line 6:
 app.post('/g
 ---------------------^
 Expecting 'STRING', 'NUMBER', 'NULL', 'TRUE', 'FALSE', '{', '[', got 'undefined'
+app.post('/generate-simulation', (req, res) => {
+    const initialCapital = 100000;
+    const symbols = ['AAPL', 'GOOG', 'TSLA', 'MSFT', 'AMZN'];
+
+    let transactions = [];
+    let dailySummary = [];
+    let capital = initialCapital;
+
+    for (let i = 45; i >= 1; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+
+        let dailyProfitLoss = 0;
+        const tradesCount = Math.floor(Math.random() * 21) + 30; // 30-50 trades
+
+        for (let t = 0; t < tradesCount; t++) {
+            const type = Math.random() > 0.5 ? 'BUY' : 'SELL';
+            const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+            const quantity = Math.floor(Math.random() * 10) + 1;
+            const price = +(Math.random() * 3000 + 100).toFixed(2);
+
+            const tradePL = type === 'BUY' ? -quantity * price : quantity * price;
+            dailyProfitLoss += tradePL;
+
+            transactions.push({
+                timestamp: new Date(date.getTime() + t * 60000).toISOString(),
+                type,
+                symbol,
+                quantity,
+                price
+            });
+        }
+
+        capital += dailyProfitLoss;
+
+        dailySummary.push({
+            date: date.toISOString().slice(0, 10),
+            totalProfitLoss: +dailyProfitLoss.toFixed(2),
+            capital: +capital.toFixed(2)
+        });
+    }
+
+    fs.writeFileSync('./transactions.json', JSON.stringify(transactions, null, 2));
+    fs.writeFileSync('./daily_summary.json', JSON.stringify(dailySummary, null, 2));
+
+    res.json({ message: 'Simulation generated successfully' });
+});
